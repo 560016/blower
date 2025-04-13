@@ -1,48 +1,49 @@
-import RPi.GPIO as GPIO
-import time
-import threading
-import paho.mqtt.client as mqtt
+if(1):
+    import RPi.GPIO as GPIO
+    import time
+    import threading
+    import paho.mqtt.client as mqtt
 
-# GPIO Definitions
-RELAY_FWD = 7     # GPIO7 - Forward Relay
-RELAY_REV = 11    # GPIO11 - Reverse Relay
-SENSOR_1 = 4      # GPIO4 - Position Sensor 1 (Forward End)
-SENSOR_2 = 17     # GPIO17 - Position Sensor 2 (Backward End)
-PUMP = 8
+    # GPIO Definitions
+    RELAY_FWD = 7     # GPIO7 - Forward Relay
+    RELAY_REV = 11    # GPIO11 - Reverse Relay
+    SENSOR_1 = 4      # GPIO4 - Position Sensor 1 (Forward End)
+    SENSOR_2 = 17     # GPIO17 - Position Sensor 2 (Backward End)
+    PUMP = 8
 
-# MQTT Definitions
-broker_ip = "test.mosquitto.org"
-port = 1883
-topic = "PTS/blower"
+    # MQTT Definitions
+    broker_ip = "test.mosquitto.org"
+    port = 1883
+    topic = "PTS/blower"
 
-# Global control flags
-pump_active = False
-pump_thread = None
+    # Global control flags
+    pump_active = False
+    pump_thread = None
 
-# Setup GPIO
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(RELAY_FWD, GPIO.OUT)
-GPIO.setup(RELAY_REV, GPIO.OUT)
-GPIO.setup(PUMP, GPIO.OUT)
-GPIO.setup(SENSOR_1, GPIO.IN)
-GPIO.setup(SENSOR_2, GPIO.IN)
+    # Setup GPIO
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(RELAY_FWD, GPIO.OUT)
+    GPIO.setup(RELAY_REV, GPIO.OUT)
+    GPIO.setup(PUMP, GPIO.OUT)
+    GPIO.setup(SENSOR_1, GPIO.IN)
+    GPIO.setup(SENSOR_2, GPIO.IN)
 
-# Ensure all outputs are off initially
-GPIO.output(RELAY_FWD, GPIO.LOW)
-GPIO.output(RELAY_REV, GPIO.LOW)
-GPIO.output(PUMP, GPIO.LOW)
+    # Ensure all outputs are off initially
+    GPIO.output(RELAY_FWD, GPIO.LOW)
+    GPIO.output(RELAY_REV, GPIO.LOW)
+    GPIO.output(PUMP, GPIO.LOW)
 
 def stop_motor():
     GPIO.output(RELAY_FWD, GPIO.LOW)
     GPIO.output(RELAY_REV, GPIO.LOW)
     print("Motor stopped")
 
-def move_forward():
+def move_left():
     GPIO.output(RELAY_FWD, GPIO.HIGH)
     GPIO.output(RELAY_REV, GPIO.LOW)
     print("Moving Forward...")
 
-def move_backward():
+def move_right():
     GPIO.output(RELAY_FWD, GPIO.LOW)
     GPIO.output(RELAY_REV, GPIO.HIGH)
     print("Moving Backward...")
@@ -79,7 +80,7 @@ def process_command(command):
             if P1 == 0:
                 SensorDetected = True
             elif count < 100:
-                move_forward()
+                move_left()
             else:
                 if count > 120:
                     count = 0
@@ -97,7 +98,7 @@ def process_command(command):
             if P2 == 0:
                 SensorDetected = True
             elif count < 100:
-                move_backward()
+                move_right()
             else:
                 if count > 120:
                     count = 0
